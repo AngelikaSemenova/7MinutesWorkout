@@ -1,17 +1,22 @@
 package com.marquiseanges.a7minutesworkout
 
+/**
+ * This is used for exercise details it is a custom model class.
+ * with getter setter functions and a constructor
+ */
 class ExerciseModel(
-    private var id : Int,
-    private var name : String,
-    private var image : Int,
-    private var isCompleted : Boolean,
-    private var isSelected : Boolean
+    private var id: Int,
+    private var name: String,
+    private var image: Int,
+    private var isCompleted: Boolean,
+    private var isSelected: Boolean
 ) {
+
     fun getId(): Int {
         return id
     }
 
-    fun setId(id : Int) {
+    fun setId(id: Int) {
         this.id = id
     }
 
@@ -19,7 +24,7 @@ class ExerciseModel(
         return name
     }
 
-    fun setId(name : String) {
+    fun setName(name: String) {
         this.name = name
     }
 
@@ -27,7 +32,7 @@ class ExerciseModel(
         return image
     }
 
-    fun setImage(name : Int) {
+    fun setImage(image: Int) {
         this.image = image
     }
 
@@ -35,7 +40,7 @@ class ExerciseModel(
         return isCompleted
     }
 
-    fun setIsCompleted(isCompleted : Boolean) {
+    fun setIsCompleted(isCompleted: Boolean) {
         this.isCompleted = isCompleted
     }
 
@@ -43,7 +48,8 @@ class ExerciseModel(
         return isSelected
     }
 
-    fun setIsSelected(isSelected : Boolean) {
+    fun setIsSelected(isSelected: Boolean) {
         this.isSelected = isSelected
     }
 }
+// END
