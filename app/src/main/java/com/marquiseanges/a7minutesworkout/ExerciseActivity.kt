@@ -1,5 +1,7 @@
 package com.marquiseanges.a7minutesworkout
 
+import android.media.MediaPlayer
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -10,7 +12,7 @@ import android.widget.Toast
 import com.marquiseanges.a7minutesworkout.databinding.ActivityExerciseBinding
 import java.util.*
 import kotlin.collections.ArrayList
-//Todo 3 implement TextToSpeechListener
+
 class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     // - Adding a variables for the 10 seconds REST timer
@@ -35,10 +37,10 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     // END
     // create a binding variable
     private var binding:ActivityExerciseBinding? = null
-
-    // TODO (Step 2 - Variable for Text to Speech which will be initialized later on.)
-    // START
     private var tts: TextToSpeech? = null // Variable for Text to Speech
+    // TODO (Step 2 - Declaring the variable of the media player for playing a notification sound when the exercise is about to start.)
+    // START
+    private var player: MediaPlayer? = null
     // END
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -46,7 +48,7 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         binding = ActivityExerciseBinding.inflate(layoutInflater)
 // pass in binding?.root in the content view
         setContentView(binding?.root)
-// then set support action bar and get toolBarExcerciser using the binding
+// then set support action bar and get toolBarExercise using the binding
 //variable
         setSupportActionBar(binding?.toolbarExercise)
 
@@ -57,8 +59,6 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             onBackPressed()
         }
 
-        // TODO (Step 4 - Initializing the variable of Text to Speech.)
-        // START
         tts = TextToSpeech(this, this)
         // END
         //Initializing and Assigning a default exercise list to our list variable
@@ -75,6 +75,26 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
      * Function is used to set the timer for REST.
      */
     private fun setupRestView() {
+
+
+        // TODO (Step 3 - Playing a notification sound when the exercise is about to start when you are in the rest state
+        //  the sound file is added in the raw folder as resource.)
+        // START
+        /**
+         * Here the sound file is added in to "raw" folder in resources.
+         * And played using MediaPlayer. MediaPlayer class can be used to control playback
+         * of audio/video files and streams.
+         */
+        try {
+            val soundURI =
+                Uri.parse("android.resource://com.marquiseanges.a7minutesworkout/" + R.raw.press_start)
+            player = MediaPlayer.create(applicationContext, soundURI)
+            player?.isLooping = false // Sets the player to be looping or non-looping.
+            player?.start() // Starts Playback.
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        // END
         binding?.flRestView?.visibility = View.VISIBLE
         binding?.tvTitle?.visibility = View.VISIBLE
         binding?.upcomingLabel?.visibility = View.VISIBLE
@@ -142,6 +162,7 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
      * Function is used to set the progress of the timer using the progress for Exercise View.
      */
     private fun setupExerciseView() {
+
         // Here according to the view make it visible as this is Exercise View so exercise view is visible and rest view is not.
         binding?.flRestView?.visibility = View.INVISIBLE
         binding?.tvTitle?.visibility = View.INVISIBLE
@@ -159,6 +180,7 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             exerciseTimer?.cancel()
             exerciseProgress = 0
         }
+
         speakOut(exerciseList!![currentExercisePosition].getName())
         // END
         // Setting up the current exercise name and imageview to the UI element.
@@ -223,11 +245,19 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             restProgress = 0
         }
 
-        // TODO (Step 7 - Shutting down the Text to Speech feature when activity is destroyed.)
+        // Shutting down the Text to Speech feature when activity is destroyed
         // START
         if (tts != null) {
             tts!!.stop()
             tts!!.shutdown()
+        }
+        // END
+
+
+        // TODO (Step 4 - When the activity is destroyed if the media player instance is not null then stop it.)
+        // START
+        if(player != null){
+            player!!.stop()
         }
         // END
         super.onDestroy()
@@ -241,9 +271,6 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
      * Called to signal the completion of the TextToSpeech engine initialization.
      */
     override fun onInit(status: Int) {
-
-        // TODO (Step 5 - After variable initializing set the language after a "success"ful result.)
-        // START
         if (status == TextToSpeech.SUCCESS) {
             // set US English as language for tts
             val result = tts?.setLanguage(Locale.US)
@@ -260,8 +287,6 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     // END
 
 
-    // TODO (Step 6 - Making a function to speak the text.)
-    // START
     /**
      * Function is used to speak the text that we pass to it.
      */
