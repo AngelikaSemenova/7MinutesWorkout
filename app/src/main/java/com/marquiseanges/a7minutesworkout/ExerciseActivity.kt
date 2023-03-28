@@ -3,11 +3,15 @@ package com.marquiseanges.a7minutesworkout
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.speech.tts.TextToSpeech
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.marquiseanges.a7minutesworkout.databinding.ActivityExerciseBinding
-
-class ExerciseActivity : AppCompatActivity() {
+import java.util.*
+import kotlin.collections.ArrayList
+//Todo 3 implement TextToSpeechListener
+class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     // - Adding a variables for the 10 seconds REST timer
     //START
@@ -31,6 +35,11 @@ class ExerciseActivity : AppCompatActivity() {
     // END
     // create a binding variable
     private var binding:ActivityExerciseBinding? = null
+
+    // TODO (Step 2 - Variable for Text to Speech which will be initialized later on.)
+    // START
+    private var tts: TextToSpeech? = null // Variable for Text to Speech
+    // END
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 //inflate the layout
@@ -47,6 +56,11 @@ class ExerciseActivity : AppCompatActivity() {
         binding?.toolbarExercise?.setNavigationOnClickListener {
             onBackPressed()
         }
+
+        // TODO (Step 4 - Initializing the variable of Text to Speech.)
+        // START
+        tts = TextToSpeech(this, this)
+        // END
         //Initializing and Assigning a default exercise list to our list variable
         // START
         exerciseList = Constants.defaultExerciseList()
@@ -61,7 +75,6 @@ class ExerciseActivity : AppCompatActivity() {
      * Function is used to set the timer for REST.
      */
     private fun setupRestView() {
-// TODO (Step 3- changing the upcoming exercise label and name visibility.)
         binding?.flRestView?.visibility = View.VISIBLE
         binding?.tvTitle?.visibility = View.VISIBLE
         binding?.upcomingLabel?.visibility = View.VISIBLE
@@ -78,7 +91,7 @@ class ExerciseActivity : AppCompatActivity() {
             restProgress = 0
         }
 
-        // TODO (Step 2 - Setting the upcoming exercise name in the UI element.)
+        // Setting the upcoming exercise name in the UI element
         // START
         // Here we have set the upcoming exercise name to the text view
         // Here as the current position is -1 by default so to selected from the list it should be 0 so we have increased it by +1.
@@ -129,7 +142,6 @@ class ExerciseActivity : AppCompatActivity() {
      * Function is used to set the progress of the timer using the progress for Exercise View.
      */
     private fun setupExerciseView() {
-// TODO (Step 4- changing the upcoming exercise label and name visibility.)
         // Here according to the view make it visible as this is Exercise View so exercise view is visible and rest view is not.
         binding?.flRestView?.visibility = View.INVISIBLE
         binding?.tvTitle?.visibility = View.INVISIBLE
@@ -147,7 +159,8 @@ class ExerciseActivity : AppCompatActivity() {
             exerciseTimer?.cancel()
             exerciseProgress = 0
         }
-
+        speakOut(exerciseList!![currentExercisePosition].getName())
+        // END
         // Setting up the current exercise name and imageview to the UI element.
         // START
         /**
@@ -209,8 +222,51 @@ class ExerciseActivity : AppCompatActivity() {
             restTimer?.cancel()
             restProgress = 0
         }
+
+        // TODO (Step 7 - Shutting down the Text to Speech feature when activity is destroyed.)
+        // START
+        if (tts != null) {
+            tts!!.stop()
+            tts!!.shutdown()
+        }
+        // END
         super.onDestroy()
         binding = null
     }
-    //END
+
+    // START
+    /**
+     * This the TextToSpeech override function
+     *
+     * Called to signal the completion of the TextToSpeech engine initialization.
+     */
+    override fun onInit(status: Int) {
+
+        // TODO (Step 5 - After variable initializing set the language after a "success"ful result.)
+        // START
+        if (status == TextToSpeech.SUCCESS) {
+            // set US English as language for tts
+            val result = tts?.setLanguage(Locale.US)
+
+            if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
+                Log.e("TTS", "The Language specified is not supported!")
+            }
+
+        } else {
+            Log.e("TTS", "Initialization Failed!")
+        }
+        // END
+    }
+    // END
+
+
+    // TODO (Step 6 - Making a function to speak the text.)
+    // START
+    /**
+     * Function is used to speak the text that we pass to it.
+     */
+    private fun speakOut(text: String) {
+        tts!!.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
+    }
+    // END
 }
