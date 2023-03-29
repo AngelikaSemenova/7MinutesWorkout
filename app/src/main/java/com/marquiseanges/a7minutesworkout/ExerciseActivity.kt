@@ -1,5 +1,6 @@
 package com.marquiseanges.a7minutesworkout
 
+import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
@@ -39,6 +40,7 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     private var tts: TextToSpeech? = null // Variable for Text to Speech
     private var player: MediaPlayer? = null
     private var exerciseAdapter: ExerciseStatusAdapter? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityExerciseBinding.inflate(layoutInflater)
@@ -51,17 +53,11 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         binding?.toolbarExercise?.setNavigationOnClickListener {
             onBackPressed()
         }
-
         tts = TextToSpeech(this, this)
         exerciseList = Constants.defaultExerciseList()
-        // END
         setupRestView()
         setupExerciseStatusRecyclerView()
     }
-
-
-    //Setting up the Get Ready View with 10 seconds of timer
-    //START
     /**
      * Function is used to set the timer for REST.
      */
@@ -84,30 +80,17 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         binding?.tvExerciseName?.visibility = View.INVISIBLE
         binding?.flExerciseView?.visibility = View.INVISIBLE
         binding?.ivImage?.visibility = View.INVISIBLE
-        /**
-         * Here firstly we will check if the timer is running the and it is not null then cancel the running timer and start the new one.
-         * And set the progress to initial which is 0.
-         */
+
         if (restTimer != null) {
             restTimer?.cancel()
             restProgress = 0
         }
 
-        // Setting the upcoming exercise name in the UI element
-        // START
-        // Here we have set the upcoming exercise name to the text view
-        // Here as the current position is -1 by default so to selected from the list it should be 0 so we have increased it by +1.
         binding?.tvUpcomingExerciseName?.text = exerciseList!![currentExercisePosition + 1].getName()
         // This function is used to set the progress details.
         setRestProgressBar()
     }
-    // END
 
-    // Setting up the 10 seconds timer for rest view and updating it continuously.
-    //START
-    /**
-     * Function is used to set the progress of timer using the progress
-     */
     private fun setRestProgressBar() {
 
         binding?.progressBar?.progress = restProgress // Sets the current progress to the specified value.
@@ -131,9 +114,6 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             override fun onFinish() {
                 // When the 10 seconds will complete this will be executed.
                 currentExercisePosition++
-
-                // TODO(Step 1 : When we are getting an updated position of exercise set that item in the list as selected and notify the adapter class.)
-                // START
                 exerciseList!![currentExercisePosition].setIsSelected(true) // Current Item is selected
                 exerciseAdapter!!.notifyDataSetChanged() // Notified the current item to adapter class to reflect it into UI.
                 // END
@@ -158,18 +138,36 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         binding?.flExerciseView?.visibility = View.VISIBLE
         binding?.ivImage?.visibility = View.VISIBLE
 
+        /**
+         * Here firstly we will check if the timer is running and it is not null then cancel the running timer and start the new one.
+         * And set the progress to the initial value which is 0.
+         */
         if (exerciseTimer != null) {
             exerciseTimer?.cancel()
             exerciseProgress = 0
         }
-        speakOut(exerciseList!![currentExercisePosition].getName())
 
+        speakOut(exerciseList!![currentExercisePosition].getName())
+        // END
+        // Setting up the current exercise name and imageview to the UI element.
+        // START
+        /**
+         * Here current exercise name and image is set to exercise view.
+         */
         binding?.ivImage?.setImageResource(exerciseList!![currentExercisePosition].getImage())
         binding?.tvExerciseName?.text = exerciseList!![currentExercisePosition].getName()
+        // END
         setExerciseProgressBar()
 
     }
+    // END
 
+
+    // After REST View Setting up the 30 seconds timer for the Exercise view and updating it continuously
+    // START
+    /**
+     * Function is used to set the progress of the timer using the progress for Exercise View for 30 Seconds
+     */
     private fun setExerciseProgressBar() {
 
         binding?.progressBarExercise?.progress = exerciseProgress
@@ -183,23 +181,15 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
             override fun onFinish() {
 
-                // TODO(Step 2 : We have changed the status of the selected item and updated the status of that, so that the position is set as completed in the exercise list.)
-                // START
-                exerciseList!![currentExercisePosition].setIsSelected(false) // exercise is completed so selection is set to false
-                exerciseList!![currentExercisePosition].setIsCompleted(true) // updating in the list that this exercise is completed
-                exerciseAdapter!!.notifyDataSetChanged() // Notifying the adapter class.
-                // END
-                // Updating the view after completing the 30 seconds exercise
-                // START
                 if (currentExercisePosition < exerciseList?.size!! - 1) {
+                    exerciseList!![currentExercisePosition].setIsSelected(false) // exercise is completed so selection is set to false
+                    exerciseList!![currentExercisePosition].setIsCompleted(true) // updating in the list that this exercise is completed
+                    exerciseAdapter?.notifyDataSetChanged()
                     setupRestView()
                 } else {
-
-                    Toast.makeText(
-                        this@ExerciseActivity,
-                        "Congratulations! You have completed the 7 minutes workout.",
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    finish()
+                    val intent = Intent(this@ExerciseActivity,FinishActivity::class.java)
+                    startActivity(intent)
                 }
                 // END
             }
@@ -230,10 +220,17 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         if(player != null){
             player!!.stop()
         }
+        // END
         super.onDestroy()
         binding = null
     }
 
+    // START
+    /**
+     * This the TextToSpeech override function
+     *
+     * Called to signal the completion of the TextToSpeech engine initialization.
+     */
     override fun onInit(status: Int) {
 
         if (status == TextToSpeech.SUCCESS) {
@@ -247,17 +244,28 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         } else {
             Log.e("TTS", "Initialization Failed!")
         }
-
+        // END
     }
 
+    /**
+     * Function is used to speak the text that we pass to it.
+     */
     private fun speakOut(text: String) {
         tts!!.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
     }
 
     private fun setupExerciseStatusRecyclerView() {
+
+        // Defining a layout manager for the recycle view
+        // Here we have used a LinearLayout Manager with horizontal scroll.
         binding?.rvExerciseStatus?.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+
+        // As the adapter expects the exercises list and context so initialize it passing it.
         exerciseAdapter = ExerciseStatusAdapter(exerciseList!!)
+
+        // Adapter class is attached to recycler view
         binding?.rvExerciseStatus?.adapter = exerciseAdapter
     }
+    // END
 }
