@@ -8,7 +8,7 @@ import android.widget.Toast
 import com.marquiseanges.a7minutesworkout.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
-
+    //  The binding is name just like the name of the layout with Binding attached
     private var binding:ActivityMainBinding? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -17,6 +17,12 @@ class MainActivity : AppCompatActivity() {
 
         binding?.flStart?.setOnClickListener {
             val intent = Intent(this,ExerciseActivity::class.java)
+            startActivity(intent)
+        }
+
+        binding?.flBMI?.setOnClickListener {
+            // Launching the BMI Activity
+            val intent = Intent(this, BMIActivity::class.java)
             startActivity(intent)
         }
     }

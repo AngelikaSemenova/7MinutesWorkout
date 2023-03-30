@@ -38,15 +38,21 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     // START
     private var exerciseList: ArrayList<ExerciseModel>? = null // We will initialize the list later.
     private var currentExercisePosition = -1 // Current Position of Exercise.
+    // END
+    // create a binding variable
     private var binding:ActivityExerciseBinding? = null
     private var tts: TextToSpeech? = null // Variable for Text to Speech
+
     private var player: MediaPlayer? = null
     private var exerciseAdapter: ExerciseStatusAdapter? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityExerciseBinding.inflate(layoutInflater)
+// pass in binding?.root in the content view
         setContentView(binding?.root)
+// then set support action bar and get toolBarExercise using the binding
+//variable
         setSupportActionBar(binding?.toolbarExercise)
 
         if (supportActionBar != null){
@@ -55,37 +61,31 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         binding?.toolbarExercise?.setNavigationOnClickListener {
             customDialogForBackButton()
         }
+
         tts = TextToSpeech(this, this)
+        // END
+        //Initializing and Assigning a default exercise list to our list variable
+        // START
         exerciseList = Constants.defaultExerciseList()
+        // END
         setupRestView()
         setupExerciseStatusRecyclerView()
+        // END
     }
 
-    override fun onBackPressed() {
-        customDialogForBackButton()
-    }
 
-    private fun customDialogForBackButton(){
-        val customDialog = Dialog(this)
-        val dialogBinding = DialogCustomBackConfirmationBinding.inflate(layoutInflater)
-        customDialog.setContentView(dialogBinding.root)
-        customDialog.setCanceledOnTouchOutside(false)
-        dialogBinding.btnYes.setOnClickListener {
-            this@ExerciseActivity.finish()
-            customDialog.dismiss()
-        }
-        dialogBinding.btnNo.setOnClickListener {
-            customDialog.dismiss()
-        }
-
-        customDialog.show()
-    }
-
+    //Setting up the Get Ready View with 10 seconds of timer
+    //START
     /**
      * Function is used to set the timer for REST.
      */
     private fun setupRestView() {
 
+        /**
+         * Here the sound file is added in to "raw" folder in resources.
+         * And played using MediaPlayer. MediaPlayer class can be used to control playback
+         * of audio/video files and streams.
+         */
         try {
             val soundURI =
                 Uri.parse("android.resource://com.marquiseanges.a7minutesworkout/" + R.raw.press_start)
@@ -103,17 +103,30 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         binding?.tvExerciseName?.visibility = View.INVISIBLE
         binding?.flExerciseView?.visibility = View.INVISIBLE
         binding?.ivImage?.visibility = View.INVISIBLE
-
+        /**
+         * Here firstly we will check if the timer is running the and it is not null then cancel the running timer and start the new one.
+         * And set the progress to initial which is 0.
+         */
         if (restTimer != null) {
             restTimer?.cancel()
             restProgress = 0
         }
 
+        // Setting the upcoming exercise name in the UI element
+        // START
+        // Here we have set the upcoming exercise name to the text view
+        // Here as the current position is -1 by default so to selected from the list it should be 0 so we have increased it by +1.
         binding?.tvUpcomingExerciseName?.text = exerciseList!![currentExercisePosition + 1].getName()
         // This function is used to set the progress details.
         setRestProgressBar()
     }
+    // END
 
+    // Setting up the 10 seconds timer for rest view and updating it continuously.
+    //START
+    /**
+     * Function is used to set the progress of timer using the progress
+     */
     private fun setRestProgressBar() {
 
         binding?.progressBar?.progress = restProgress // Sets the current progress to the specified value.
@@ -137,6 +150,7 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             override fun onFinish() {
                 // When the 10 seconds will complete this will be executed.
                 currentExercisePosition++
+
                 exerciseList!![currentExercisePosition].setIsSelected(true) // Current Item is selected
                 exerciseAdapter!!.notifyDataSetChanged() // Notified the current item to adapter class to reflect it into UI.
                 // END
@@ -289,6 +303,24 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
         // Adapter class is attached to recycler view
         binding?.rvExerciseStatus?.adapter = exerciseAdapter
+    }
+
+    private fun customDialogForBackButton() {
+        val customDialog = Dialog(this)
+
+        val dialogBinding = DialogCustomBackConfirmationBinding.inflate(layoutInflater)
+
+        customDialog.setContentView(dialogBinding.root)
+        customDialog.setCanceledOnTouchOutside(false)
+        dialogBinding.tvYes.setOnClickListener {
+            this@ExerciseActivity.finish()
+            customDialog.dismiss() // Dialog will be dismissed
+        }
+        dialogBinding.tvNo.setOnClickListener {
+            customDialog.dismiss()
+        }
+        //Start the dialog and display it on screen.
+        customDialog.show()
     }
     // END
 }

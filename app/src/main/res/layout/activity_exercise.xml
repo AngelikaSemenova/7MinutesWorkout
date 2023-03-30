@@ -169,7 +169,6 @@
                 tools:text="10" />
         </LinearLayout>
     </FrameLayout>
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvExerciseStatus"
         android:layout_width="wrap_content"
