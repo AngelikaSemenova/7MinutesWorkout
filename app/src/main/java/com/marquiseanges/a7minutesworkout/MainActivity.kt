@@ -25,6 +25,15 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, BMIActivity::class.java)
             startActivity(intent)
         }
+
+
+        // START
+        binding?.flHistory?.setOnClickListener {
+            // Launching the History Activity
+            val intent = Intent(this, HistoryActivity::class.java)
+            startActivity(intent)
+        }
+        //END
     }
 
 
