@@ -21,10 +21,8 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
 
     // - Adding a variables for the 10 seconds REST timer
     //START
-    private var restTimer: CountDownTimer? =
-        null // Variable for Rest Timer and later on we will initialize it.
-    private var restProgress =
-        0 // Variable for timer progress. As initial value the rest progress is set to 0. As we are about to start.
+    private var restTimer: CountDownTimer? = null // Variable for Rest Timer and later on we will initialize it.
+    private var restProgress = 0 // Variable for timer progress. As initial value the rest progress is set to 0. As we are about to start.
     //END
 
 
@@ -42,17 +40,24 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
     // create a binding variable
     private var binding:ActivityExerciseBinding? = null
     private var tts: TextToSpeech? = null // Variable for Text to Speech
-
+    //  Declaring the variable of the media player for playing a notification sound when the exercise is about to start.)
+    // START
     private var player: MediaPlayer? = null
-    private var exerciseAdapter: ExerciseStatusAdapter? = null
+    // END
 
+    //  Declaring a variable of an adapter class to bind it to recycler view.)
+    // START
+    // Declaring an exerciseAdapter object which will be initialized later.
+    private var exerciseAdapter: ExerciseStatusAdapter? = null
+    // END
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        //inflate the layout
         binding = ActivityExerciseBinding.inflate(layoutInflater)
-// pass in binding?.root in the content view
+        // pass in binding?.root in the content view
         setContentView(binding?.root)
-// then set support action bar and get toolBarExercise using the binding
-//variable
+        // then set support action bar and get toolBarExercise using the binding
+        //variable
         setSupportActionBar(binding?.toolbarExercise)
 
         if (supportActionBar != null){
@@ -62,6 +67,8 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             customDialogForBackButton()
         }
 
+        //  Initializing the variable of Text to Speech.)
+        // START
         tts = TextToSpeech(this, this)
         // END
         //Initializing and Assigning a default exercise list to our list variable
@@ -69,6 +76,10 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         exerciseList = Constants.defaultExerciseList()
         // END
         setupRestView()
+
+        //  Calling the function where we have bound the adapter to recycler view to show the data in the UI.)
+        // START
+        // setting up the exercise recycler view
         setupExerciseStatusRecyclerView()
         // END
     }
@@ -81,6 +92,10 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
      */
     private fun setupRestView() {
 
+
+        //  Playing a notification sound when the exercise is about to start when you are in the rest state
+        //  the sound file is added in the raw folder as resource.)
+        // START
         /**
          * Here the sound file is added in to "raw" folder in resources.
          * And played using MediaPlayer. MediaPlayer class can be used to control playback
@@ -151,8 +166,10 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
                 // When the 10 seconds will complete this will be executed.
                 currentExercisePosition++
 
+                // When we are getting an updated position of exercise set that item in the list as selected and notify the adapter class.)
+                // START
                 exerciseList!![currentExercisePosition].setIsSelected(true) // Current Item is selected
-                exerciseAdapter!!.notifyDataSetChanged() // Notified the current item to adapter class to reflect it into UI.
+                exerciseAdapter?.notifyDataSetChanged() // Notified the current item to adapter class to reflect it into UI.
                 // END
                 setupExerciseView()
             }
@@ -167,6 +184,8 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
      * Function is used to set the progress of the timer using the progress for Exercise View.
      */
     private fun setupExerciseView() {
+    // changing the upcoming exercise label and name visibility.)
+        // Here according to the view make it visible as this is Exercise View so exercise view is visible and rest view is not.
         binding?.flRestView?.visibility = View.INVISIBLE
         binding?.tvTitle?.visibility = View.INVISIBLE
         binding?.tvUpcomingExerciseName?.visibility = View.INVISIBLE
@@ -183,7 +202,8 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             exerciseTimer?.cancel()
             exerciseProgress = 0
         }
-
+        // Get the current exercise name from the list and pass it to the speak out method which we have created.)
+        // START
         speakOut(exerciseList!![currentExercisePosition].getName())
         // END
         // Setting up the current exercise name and imageview to the UI element.
@@ -253,7 +273,11 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
             tts!!.stop()
             tts!!.shutdown()
         }
+        // END
 
+
+        //  When the activity is destroyed if the media player instance is not null then stop it.)
+        // START
         if(player != null){
             player!!.stop()
         }
@@ -270,6 +294,8 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
      */
     override fun onInit(status: Int) {
 
+        //  After variable initializing set the language after a "success"ful result.)
+        // START
         if (status == TextToSpeech.SUCCESS) {
             // set US English as language for tts
             val result = tts?.setLanguage(Locale.US)
@@ -283,14 +309,25 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         }
         // END
     }
+    // END
 
+
+    // Making a function to speak the text.)
+    // START
     /**
      * Function is used to speak the text that we pass to it.
      */
     private fun speakOut(text: String) {
         tts!!.speak(text, TextToSpeech.QUEUE_FLUSH, null, "")
     }
+    // END
 
+
+    /**
+     * Function is used to set up the recycler view to UI and asining the Layout Manager and Adapter Class is attached to it.
+     */
+    // Binding adapter class to recycler view and setting the recycler view layout manager and passing a list to the adapter.)
+    // START
     private fun setupExerciseStatusRecyclerView() {
 
         // Defining a layout manager for the recycle view
@@ -304,15 +341,27 @@ class ExerciseActivity : AppCompatActivity(), TextToSpeech.OnInitListener {
         // Adapter class is attached to recycler view
         binding?.rvExerciseStatus?.adapter = exerciseAdapter
     }
+    // END
 
+    /**
+     * Function is used to launch the custom confirmation dialog.
+     */
+    //Performing the steps to show the custom dialog for back button confirmation while the exercise is going on.)
+    // START
     private fun customDialogForBackButton() {
         val customDialog = Dialog(this)
-
+        //create a binding variable
         val dialogBinding = DialogCustomBackConfirmationBinding.inflate(layoutInflater)
-
+        /*Set the screen content from a layout resource.
+         The resource will be inflated, adding all top-level views to the screen.*/
+        // bind to the dialog
         customDialog.setContentView(dialogBinding.root)
+        //to ensure that the user clicks one of the button and that the dialog is
+        //not dismissed when surrounding parts of the screen is clicked
         customDialog.setCanceledOnTouchOutside(false)
         dialogBinding.tvYes.setOnClickListener {
+            // We need to specify that we are finishing this activity if not the player
+            // continues beeping even after the screen is not visibile
             this@ExerciseActivity.finish()
             customDialog.dismiss() // Dialog will be dismissed
         }

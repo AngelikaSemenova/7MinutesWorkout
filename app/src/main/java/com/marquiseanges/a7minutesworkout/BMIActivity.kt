@@ -52,7 +52,6 @@ class BMIActivity : AppCompatActivity() {
     }
 
     private fun calculateUnits(){
-        //TODO(Step 2 : Handling the current visible view and calculating US UNITS view input values if they are valid.)
         // START
         if (currentVisibleView == METRIC_UNITS_VIEW) {
             // The values are validated.
@@ -156,7 +155,6 @@ class BMIActivity : AppCompatActivity() {
     }
     // END
 
-// TODO(Step 1 : Validating the US UNITS view input values.)
     // START
     /**
      * Function is used to validate the input values for US UNITS.
